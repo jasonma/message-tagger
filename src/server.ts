@@ -1,5 +1,6 @@
 import * as Koa from "koa";
 import * as Router from "koa-router";
+import { GmailAuth } from "./gmail-auth/GmailAuth";
 
 const app = new Koa();
 const router = new Router();
@@ -13,6 +14,7 @@ app.use(async (ctx, next) => {
 
 router.get("/*", async (ctx) => {
     ctx.body = "Hello World!";
+    new GmailAuth();
 });
 
 app.use(router.routes());
