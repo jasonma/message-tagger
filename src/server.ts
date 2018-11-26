@@ -5,6 +5,8 @@ import { GmailAuth } from "./gmail-auth/GmailAuth";
 const app = new Koa();
 const router = new Router();
 
+const gmailAuth = new GmailAuth(GmailAuth.GetMessages);
+
 app.use(async (ctx, next) => {
     // Log the request to the console
     console.log("Url:", ctx.url);
@@ -14,7 +16,6 @@ app.use(async (ctx, next) => {
 
 router.get("/*", async (ctx) => {
     ctx.body = "Hello World!";
-    new GmailAuth();
 });
 
 app.use(router.routes());
