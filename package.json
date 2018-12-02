@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "tslint --project .",
     "watch-server": "nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/server.ts"
   },
   "keywords": [],
@@ -12,13 +13,16 @@
   "devDependencies": {
     "@types/koa": "^2.0.47",
     "@types/koa-router": "^7.0.35",
+    "@types/lodash": "^4.14.118",
     "nodemon": "^1.18.6",
     "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
     "typescript": "^3.1.6"
   },
   "dependencies": {
     "googleapis": "27",
     "koa": "^2.6.2",
-    "koa-router": "^7.4.0"
+    "koa-router": "^7.4.0",
+    "lodash": "^4.17.11"
   }
 }
