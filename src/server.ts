@@ -3,7 +3,8 @@ import * as Router from "koa-router";
 import { GmailAuth } from "./gmail/auth/Auth";
 import { GetMessage, GetMessageIds, IMessageIdResult } from "./gmail/Gmail";
 import { IStrategy, TestStrategy } from "./identification-strategy/Strategy";
-import { IMessage, MessageFromGmailMessage } from "./message/api";
+import { IMessage } from "./message/api";
+import { MessageFromGmailMessage } from "./message/ConvertFromGmail";
 
 const app = new Koa();
 const router = new Router();
@@ -15,9 +16,12 @@ function processMessages(gmail: any, pageToken: string) {
     }).then((vals: any[]) => {
         const messages = vals.map(MessageFromGmailMessage);
         messages.forEach((message: IMessage) => {
+            if (!message) {
+                return;
+            }
             const isSensitive = strategies.map((strategy: IStrategy) => strategy.IsSensitive(message));
             if (isSensitive.some((val) => val)) {
-                console.log("message is sensitive: ", message);
+                console.log("message is sensitive: ", message.subject);
             }
         });
         if (pageToken) {
