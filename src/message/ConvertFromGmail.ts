@@ -1,5 +1,5 @@
 import { IGmailHeader, IGmailPart } from "../gmail/api";
-import { IGmailMessageResult } from "../gmail/Gmail";
+import { IGmailMessageResult } from "../gmail/api";
 import { EmailAddress, IMessage } from "./api";
 
 export function MessageFromGmailMessage(messageResult: IGmailMessageResult): IMessage {

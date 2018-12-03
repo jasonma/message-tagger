@@ -1,19 +1,4 @@
-// TODO: find / define types for gmail client
-
-export interface IGmailLabel {
-    id: string;
-    name: string;
-}
-
-export interface IGmailMessageIdsResult {
-    messageIds: string[];
-    pageToken: string;
-}
-
-export interface IGmailMessageResult {
-    id: string;
-    gmailMessage: any;
-}
+import { IGmailLabel, IGmailMessageIdsResult, IGmailMessageResult } from "./api";
 
 export class Gmail {
     private labelByNameCache: { [name: string]: IGmailLabel } = {};

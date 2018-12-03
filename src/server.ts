@@ -1,7 +1,8 @@
 import { IAction } from "./action/api";
 import { LabelAction } from "./action/LabelAction";
+import { IGmailLabel, IGmailMessageIdsResult } from "./gmail/api";
 import { GmailAuth } from "./gmail/auth/Auth";
-import { Gmail, IGmailLabel, IGmailMessageIdsResult } from "./gmail/Gmail";
+import { Gmail } from "./gmail/Gmail";
 import { IStrategy } from "./identification-strategy/api";
 import { FileSharingLinkStrategy } from "./identification-strategy/FileSharingLinkStrategy";
 import { IMessage } from "./message/api";
