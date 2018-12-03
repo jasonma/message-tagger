@@ -1,8 +1,26 @@
+export class EmailAddress {
+    public name: string;
+    public address: string;
+
+    constructor(s: string) {
+        if (s.indexOf("<") > 0) {
+            const matches = s.match(/^(.*) <(.*)>$/);
+            if (matches) {
+                this.name = matches[1];
+                this.address = matches[2];
+                return;
+            }
+        }
+        this.name = "";
+        this.address = s;
+    }
+}
+
 export interface IMessage {
-    from: string;
-    to: string[];
-    cc: string[];
-    bcc: string[];
+    from: EmailAddress;
+    to: EmailAddress[];
+    cc: EmailAddress[];
+    bcc: EmailAddress[];
     date: Date;
     subject: string;
     body: string;
@@ -15,22 +33,30 @@ export interface IHeader {
 
 export function MessageFromGmailMessage(gmailMessage: any): IMessage {
     const message = {
-        to: [],
-        cc: [],
         bcc: [],
+        cc: [],
+        to: [],
     } as IMessage;
     gmailMessage.headers.forEach((header: IHeader) => {
-        switch(header.name) {
-            case "From":
-            message.from = header.value;
+        switch (header.name.toLowerCase()) {
+            case "from":
+            message.from = new EmailAddress(header.value);
             break;
-            case "To":
-            message.to.push(header.value);
+            case "to":
+            message.to.push(new EmailAddress(header.value));
             break;
-            case "Subject":
+            case "subject":
             message.subject = header.value;
             break;
         }
-    })
+    });
+    if (!validate(message)) {
+        console.error("Message invalid.", gmailMessage);
+        return null;
+    }
     return message;
+}
+
+function validate(message: IMessage) {
+    return message.from; // && (message.to.length > 0 || message.cc.length > 0 || message.bcc.length > 0);
 }

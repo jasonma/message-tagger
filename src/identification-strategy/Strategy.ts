@@ -6,6 +6,6 @@ export interface IStrategy {
 
 export class TestStrategy implements IStrategy {
     public IsSensitive(message: IMessage): boolean {
-        return message.from === "auto-confirm@amazon.com";
+        return message.from.address === "auto-confirm@amazon.com";
     }
 }

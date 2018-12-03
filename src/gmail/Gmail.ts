@@ -13,16 +13,21 @@ export function GetLabels(gmail: any): Promise<string[]> {
     });
 }
 
-export function GetMessageIds(gmail: any): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
-        gmail.users.messages.list({userId: "me"}, (err: Error, res: any) => {
+export interface IMessageIdResult {
+    messageIds: string[];
+    pageToken: string;
+}
+
+export function GetMessageIds(gmail: any, pageToken: string): Promise<IMessageIdResult> {
+    return new Promise<IMessageIdResult>((resolve, reject) => {
+        gmail.users.messages.list({userId: "me", pageToken}, (err: Error, res: any) => {
             if (err) {
                 reject(err);
                 return;
             }
             const { messages } = res.data;
-            console.log(res);
-            resolve(messages.map((message: any) => message.id));
+            const messageIds = messages.map((message: any) => message.id);
+            resolve({messageIds, pageToken: res.data.nextPageToken});
         });
     });
 }
@@ -35,6 +40,6 @@ export function GetMessage(gmail: any, messageId: string): Promise<any> {
                 return;
             }
             resolve(res.data.payload);
-        })
+        });
     });
 }

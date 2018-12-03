@@ -1,27 +1,33 @@
 import * as Koa from "koa";
 import * as Router from "koa-router";
 import { GmailAuth } from "./gmail/auth/Auth";
-import { GetMessage, GetMessageIds } from "./gmail/Gmail";
-import { MessageFromGmailMessage, IMessage } from "./message/api";
+import { GetMessage, GetMessageIds, IMessageIdResult } from "./gmail/Gmail";
 import { IStrategy, TestStrategy } from "./identification-strategy/Strategy";
+import { IMessage, MessageFromGmailMessage } from "./message/api";
 
 const app = new Koa();
 const router = new Router();
 
-const strategies: IStrategy[] = [new TestStrategy()];
-
-const gmail = new GmailAuth().Gmail();
-GetMessageIds(gmail).then((messageIds: string[]) => {
-    return Promise.all(messageIds.map((messageId) => GetMessage(gmail, messageId)));
-}).then((vals: any[]) => {
-    const messages = vals.map(MessageFromGmailMessage);
-    messages.forEach((message: IMessage) => {
-        const isSensitive = strategies.map((strategy: IStrategy) => strategy.IsSensitive(message));
-        if (isSensitive.some(val => val)) {
-            console.log("message is sensitive: ", message);
+function processMessages(gmail: any, pageToken: string) {
+    GetMessageIds(gmail, pageToken).then((result: IMessageIdResult) => {
+        pageToken = result.pageToken;
+        return Promise.all(result.messageIds.map((messageId) => GetMessage(gmail, messageId)));
+    }).then((vals: any[]) => {
+        const messages = vals.map(MessageFromGmailMessage);
+        messages.forEach((message: IMessage) => {
+            const isSensitive = strategies.map((strategy: IStrategy) => strategy.IsSensitive(message));
+            if (isSensitive.some((val) => val)) {
+                console.log("message is sensitive: ", message);
+            }
+        });
+        if (pageToken) {
+            processMessages(gmail, pageToken);
         }
     });
-});
+}
+
+const strategies: IStrategy[] = [new TestStrategy()];
+processMessages(new GmailAuth().Gmail(), null);
 
 app.use(async (ctx, next) => {
     // Log the request to the console
