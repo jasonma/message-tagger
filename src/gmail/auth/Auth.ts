@@ -4,7 +4,7 @@ import { google } from "googleapis";
 import { CLIENT_ID } from "./client_id";
 
 export class GmailAuth {
-    private SCOPES: string[] = ["https://www.googleapis.com/auth/gmail.readonly"];
+    // private SCOPES: string[] = ["https://www.googleapis.com/auth/gmail.readonly"];
     private TOKEN_PATH = "token.json";
 
     private oAuth2Client: OAuth2Client;
