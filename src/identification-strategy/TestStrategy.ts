@@ -1,8 +1,5 @@
 import { IMessage } from "../message/api";
-
-export interface IStrategy {
-    IsSensitive(message: IMessage): boolean;
-}
+import { IStrategy } from "./api";
 
 export class TestStrategy implements IStrategy {
     public IsSensitive(message: IMessage): boolean {

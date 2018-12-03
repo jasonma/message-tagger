@@ -1,19 +1,16 @@
-import * as Koa from "koa";
-import * as Router from "koa-router";
+import { IAction } from "./action/api";
+import { LabelAction } from "./action/LabelAction";
 import { GmailAuth } from "./gmail/auth/Auth";
-import { GetMessage, GetMessageIds, IMessageIdResult } from "./gmail/Gmail";
+import { Gmail, IGmailLabel, IGmailMessageIdsResult } from "./gmail/Gmail";
+import { IStrategy } from "./identification-strategy/api";
 import { FileSharingLinkStrategy } from "./identification-strategy/FileSharingLinkStrategy";
-import { IStrategy } from "./identification-strategy/Strategy";
 import { IMessage } from "./message/api";
 import { MessageFromGmailMessage } from "./message/ConvertFromGmail";
 
-const app = new Koa();
-const router = new Router();
-
-function processMessages(gmail: any, pageToken: string) {
-    GetMessageIds(gmail, pageToken).then((result: IMessageIdResult) => {
+function processMessages(pageToken?: string) {
+    gmail.GetMessageIds(pageToken).then((result: IGmailMessageIdsResult) => {
         pageToken = result.pageToken;
-        return Promise.all(result.messageIds.map((messageId) => GetMessage(gmail, messageId)));
+        return Promise.all(result.messageIds.map((messageId) => gmail.GetMessage(messageId)));
     }).then((vals: any[]) => {
         const messages = vals.map(MessageFromGmailMessage);
         messages.forEach((message: IMessage) => {
@@ -23,29 +20,47 @@ function processMessages(gmail: any, pageToken: string) {
             const isSensitive = strategies.map((strategy: IStrategy) => strategy.IsSensitive(message));
             if (isSensitive.some((val) => val)) {
                 console.log("message is sensitive: ", message.subject);
+                actions.forEach((action: IAction) => {
+                    action.takeAction(gmail, message);
+                });
             }
         });
         if (pageToken) {
-            processMessages(gmail, pageToken);
+            processMessages(pageToken);
         }
     });
 }
 
+const sensitiveTag = "tags/sensitive";
 const strategies: IStrategy[] = [new FileSharingLinkStrategy()];
-processMessages(new GmailAuth().Gmail(), null);
-
-app.use(async (ctx, next) => {
-    // Log the request to the console
-    console.log("Url:", ctx.url);
-    // Pass the request to the next middleware function
-    await next();
+const actions: IAction[] = [new LabelAction(sensitiveTag)];
+const gmail = new Gmail(new GmailAuth().Gmail());
+gmail.GetLabels().then((labels: IGmailLabel[]) => {
+    const label = labels.find((l) => l.name === sensitiveTag);
+    if (!label) {
+        return gmail.CreateLabel(sensitiveTag);
+    } else {
+        return Promise.resolve(label);
+    }
+}).then((_) => {
+    processMessages();
 });
 
-router.get("/*", async (ctx) => {
-    ctx.body = "Hello World!";
-});
+// const app = new Koa();
+// const router = new Router();
 
-app.use(router.routes());
+// app.use(async (ctx, next) => {
+//     // Log the request to the console
+//     console.log("Url:", ctx.url);
+//     // Pass the request to the next middleware function
+//     await next();
+// });
+
+// router.get("/*", async (ctx) => {
+//     ctx.body = "Hello World!";
+// });
+
+// app.use(router.routes());
 
 // app.listen(3000);
 

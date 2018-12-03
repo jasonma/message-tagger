@@ -1,12 +1,15 @@
 import { IGmailHeader, IGmailPart } from "../gmail/api";
+import { IGmailMessageResult } from "../gmail/Gmail";
 import { EmailAddress, IMessage } from "./api";
 
-export function MessageFromGmailMessage(gmailMessage: any): IMessage {
+export function MessageFromGmailMessage(messageResult: IGmailMessageResult): IMessage {
     const message = {
         bcc: [],
         cc: [],
+        id: messageResult.id,
         to: [],
     } as IMessage;
+    const { gmailMessage } = messageResult;
     gmailMessage.headers.forEach((header: IGmailHeader) => {
         switch (header.name.toLowerCase()) {
             case "from":
