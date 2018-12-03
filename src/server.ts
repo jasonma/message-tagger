@@ -2,7 +2,8 @@ import * as Koa from "koa";
 import * as Router from "koa-router";
 import { GmailAuth } from "./gmail/auth/Auth";
 import { GetMessage, GetMessageIds, IMessageIdResult } from "./gmail/Gmail";
-import { IStrategy, TestStrategy } from "./identification-strategy/Strategy";
+import { FileSharingLinkStrategy } from "./identification-strategy/FileSharingLinkStrategy";
+import { IStrategy } from "./identification-strategy/Strategy";
 import { IMessage } from "./message/api";
 import { MessageFromGmailMessage } from "./message/ConvertFromGmail";
 
@@ -30,7 +31,7 @@ function processMessages(gmail: any, pageToken: string) {
     });
 }
 
-const strategies: IStrategy[] = [new TestStrategy()];
+const strategies: IStrategy[] = [new FileSharingLinkStrategy()];
 processMessages(new GmailAuth().Gmail(), null);
 
 app.use(async (ctx, next) => {

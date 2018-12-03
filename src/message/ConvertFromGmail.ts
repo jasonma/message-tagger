@@ -27,7 +27,7 @@ export function MessageFromGmailMessage(gmailMessage: any): IMessage {
         }
     });
     message.body = parseBody(gmailMessage);
-    if (!message.from) {
+    if (!message.from || message.body === null || message.body === undefined) {
         console.error("Message invalid.", gmailMessage);
         return null;
     }
@@ -48,6 +48,7 @@ function parseBody(part: IGmailPart): string {
             return Buffer.from(part.body.data, "base64").toString();
         } else {
             // console.warn(`part with mimeType ${part.mimeType} is an attachment; ignoring...`);
+            return "";
         }
     } else if (part.mimeType.startsWith("multipart")) {
         return part.parts.map(parseBody).join("\n");
