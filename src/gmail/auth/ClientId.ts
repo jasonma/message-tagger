@@ -1,14 +1,13 @@
-export interface IClientId {
-    web: IClientIdInfo;
-    installed: IClientIdInfo;
-}
+import { CLIENT_SECRET } from "./client_id";
 
 export interface IClientIdInfo {
     client_id: string;
-    project_id: string;
-    auth_uri: string;
-    token_uri: string;
-    auth_provider_x509_cert_url: string;
     client_secret: string;
-    redirect_uris?: string[];
+    redirect_uris: string[];
 }
+
+export const CLIENT_INFO: IClientIdInfo = {
+    client_id: "619658690006-8i11qrpq3jka778cgnj970g2hursh6pl.apps.googleusercontent.com",
+    client_secret: CLIENT_SECRET,
+    redirect_uris: ["http://localhost:3000/auth"],
+};
