@@ -1,4 +1,4 @@
-import { IGmailLabel, IGmailMessageIdsResult, IGmailMessageResult } from "./api";
+import { IGmailAttachmentResult, IGmailLabel, IGmailMessageIdsResult, IGmailMessageResult } from "./api";
 
 export class Gmail {
     private labelByNameCache: { [name: string]: IGmailLabel } = {};
@@ -66,12 +66,26 @@ export class Gmail {
         if (this.messageCache[messageId]) {
             return Promise.resolve(this.messageCache[messageId]);
         }
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<IGmailMessageResult>((resolve, reject) => {
             this.retry(this.gmail.users.messages.get, {userId: "me", id: messageId}, reject, (res: any) => {
                 this.messageCache[messageId] = res.data.payload;
                 resolve({
                     gmailMessage: res.data.payload,
                     id: messageId,
+                });
+            });
+        });
+    }
+
+    public GetAttachment(attachmentId: string, messageId: string): Promise<IGmailAttachmentResult> {
+        return new Promise<IGmailAttachmentResult>((resolve, reject) => {
+            const params = {userId: "me", id: attachmentId, messageId};
+            this.retry(this.gmail.users.messages.attachments.get, params, reject, (res: any) => {
+                resolve({
+                    attachmentId,
+                    data: Buffer.from(res.data.data, "base64").toString(),
+                    messageId,
+                    size: res.data.size,
                 });
             });
         });

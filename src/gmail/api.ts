@@ -31,3 +31,10 @@ export interface IGmailPart {
     };
     parts: IGmailPart[];
 }
+
+export interface IGmailAttachmentResult {
+    attachmentId: string;
+    messageId: string;
+    size: number;
+    data: string;
+}

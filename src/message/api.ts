@@ -25,4 +25,12 @@ export interface IMessage {
     subject: string;
     body: string;
     id: string;
+    attachments: IAttachment[];
+}
+
+export interface IAttachment {
+    id: string;
+    mimeType: string;
+    data?: string;
+    size?: number;
 }

@@ -1,6 +1,6 @@
 import { IGmailHeader, IGmailPart } from "../gmail/api";
 import { IGmailMessageResult } from "../gmail/api";
-import { EmailAddress, IMessage } from "./api";
+import { EmailAddress, IAttachment, IMessage } from "./api";
 
 export function MessageFromGmailMessage(messageResult: IGmailMessageResult): IMessage {
     const message = {
@@ -29,7 +29,9 @@ export function MessageFromGmailMessage(messageResult: IGmailMessageResult): IMe
             break;
         }
     });
-    message.body = parseBody(gmailMessage);
+    const { attachments, body } = parseBody(gmailMessage);
+    message.attachments = attachments;
+    message.body = body;
     if (!message.from || message.body === null || message.body === undefined) {
         console.error("Message invalid.", gmailMessage);
         return null;
@@ -37,26 +39,32 @@ export function MessageFromGmailMessage(messageResult: IGmailMessageResult): IMe
     return message;
 }
 
-function parseBody(part: IGmailPart): string {
-    if (!part) {
-        return "";
-    }
-    if (part.mimeType.startsWith("image")) {
-        // ignore all images
-        return "";
+interface IParsedParts {
+    body: string;
+    attachments: IAttachment[];
+}
+
+function parseBody(part: IGmailPart): IParsedParts {
+    const result: IParsedParts = {
+        attachments: [],
+        body: "",
+    };
+    if (!part || part.mimeType.startsWith("image")) {
+        return result;
     }
 
-    if (part.mimeType.startsWith("text")) {
-        if (part.body.data) {
-            return Buffer.from(part.body.data, "base64").toString();
-        } else {
-            // console.warn(`part with mimeType ${part.mimeType} is an attachment; ignoring...`);
-            return "";
-        }
-    } else if (part.mimeType.startsWith("multipart")) {
-        return part.parts.map(parseBody).join("\n");
+    if (part.mimeType.startsWith("multipart")) {
+        part.parts.forEach((subpart: IGmailPart) => {
+            const { attachments, body } = parseBody(subpart);
+            result.attachments.push(...attachments);
+            result.body += body + "\n";
+        });
     } else {
-        // console.warn(`mimeType ${part.mimeType} not recognized; ignored...`);
-        return "";
+        if (part.body.data) {
+            result.body += Buffer.from(part.body.data, "base64").toString() + "\n";
+        } else if (part.body.attachmentId) {
+            result.attachments.push({id: part.body.attachmentId, mimeType: part.mimeType});
+        }
     }
+    return result;
 }
