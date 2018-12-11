@@ -99,9 +99,12 @@ export class Gmail {
 
         const callback = (err: any, res: any) => {
             if (err) {
-                if (err.code && err.code === "ENOTFOUND") {
-                    console.log("retrying...");
+                if (err.code && (err.code === "ENOTFOUND" || err.code === "ECONNRESET")) {
                     gmailCall(params, callback);
+                } else if (err.response && err.response.status === 429) {
+                    // 429 Too many concurrent requests for user
+                    // TODO: make this back off exponentially
+                    setTimeout(() => gmailCall(params, callback), 3000);
                 } else {
                     console.error(err);
                     reject(err);

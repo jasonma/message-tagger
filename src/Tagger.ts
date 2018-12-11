@@ -55,8 +55,8 @@ export class Tagger {
                 attachment.size = attachments[attachment.id].size;
             });
 
-            const isSensitive = this.strategies.map((strategy: IStrategy) => strategy.IsSensitive(message));
-            if (isSensitive.some((val) => val)) {
+            const isSensitive = this.strategies.some((strategy: IStrategy) => strategy.IsSensitive(message));
+            if (isSensitive) {
                 console.log("message is sensitive: ", message.subject);
                 this.actions.forEach((action: IAction) => {
                     action.takeAction(this.gmail, message);
