@@ -2,7 +2,7 @@ import { IAction } from "./action/api";
 import { LabelAction } from "./action/LabelAction";
 import { IGmailAttachmentResult, IGmailLabel, IGmailMessageIdsResult, IGmailMessageResult } from "./gmail/api";
 import { Gmail } from "./gmail/Gmail";
-import { IStrategy } from "./identification-strategy/api";
+import { ISensitivityScore, IStrategy } from "./identification-strategy/api";
 import { FileSharingLinkStrategy } from "./identification-strategy/FileSharingLinkStrategy";
 import { IAttachment, IMessage } from "./message/api";
 import { MessageFromGmailMessage } from "./message/ConvertFromGmail";
@@ -56,9 +56,9 @@ export class Tagger {
                 attachment.size = attachments[attachment.id].size;
             });
 
-            const isSensitive = this.strategies.some((strategy: IStrategy) => strategy.IsSensitive(message));
-            this.stats.MessageProcessed(message, isSensitive);
-            if (isSensitive) {
+            const scores = this.strategies.map((strategy: IStrategy) => strategy.Score(message));
+            this.stats.MessageProcessed(message, scores);
+            if (scores.some((score: ISensitivityScore) => score.sensitivity > 0.5)) {
                 console.debug("message is sensitive: ", message.subject);
                 this.actions.forEach((action: IAction) => {
                     action.takeAction(this.gmail, message);

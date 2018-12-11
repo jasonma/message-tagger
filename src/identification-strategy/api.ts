@@ -1,5 +1,10 @@
 import { IMessage } from "../message/api";
 
+export interface ISensitivityScore {
+    sensitivity: number;
+    reason: string;
+}
+
 export interface IStrategy {
-    IsSensitive(message: IMessage): boolean;
+    Score(message: IMessage): ISensitivityScore;
 }

@@ -1,5 +1,4 @@
-import { IMessage } from "../message/api";
-import { Stats } from "../stats/Stats";
+import { ISensitiveEmail, Stats } from "../stats/Stats";
 
 // TODO: write a real frontend.
 export const STYLESHEET_PATH: string = "/style.css";
@@ -8,12 +7,33 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-td {
-    padding: 5px;
+thead,
+tfoot {
+    background-color: #3f87a6;
+    color: #fff;
 }
 
-tr:nth-child(even) {
-    background: #f2f2f2;
+tbody {
+    background-color: #e4f0f5;
+}
+
+caption {
+    padding: 10px;
+    caption-side: bottom;
+}
+
+table {
+    border-collapse: collapse;
+    border: 2px solid rgb(200, 200, 200);
+    letter-spacing: 1px;
+    font-family: sans-serif;
+    font-size: .8rem;
+}
+
+td,
+th {
+    border: 1px solid rgb(190, 190, 190);
+    padding: 5px 10px;
 }`;
 
 export class Ui {
@@ -33,17 +53,24 @@ export class Ui {
         </html>`;
     }
 
-    private renderTable(messages: IMessage[]): string {
+    private renderTable(messages: ISensitiveEmail[]): string {
         return `<table>
-                ${messages.map((message: IMessage) => this.renderMessage(message)).join("\n")}
+                <thead>
+                    <tr><td>Date</td><td>From</td><td>Subject</td><td>Score</td><td>Reason</td></tr>
+                </thead>
+                <tbody>
+                    ${messages.map((message: ISensitiveEmail) => this.renderMessage(message)).join("\n")}
+                </tbody>
             </table>`;
     }
 
-    private renderMessage(message: IMessage): string {
+    private renderMessage(message: ISensitiveEmail): string {
         const fields: string[] = [
             message.date.toString(),
-            message.from.toString(),
+            message.from,
             message.subject,
+            message.score.sensitivity.toString(),
+            message.score.reason,
         ];
         return `<tr>${fields.map((field: string) => `<td>${this.encode(field)}</td>`).join("")}</tr>`;
     }
