@@ -31,7 +31,7 @@ export class Gmail {
                 return res;
             });
         }
-        console.log(`applying label to ${messageId}`);
+        console.debug(`applying label to ${messageId}`);
         return labelPromise.then((label: IGmailLabel) => {
             this.gmail.users.messages.modify({
                 id: messageId,

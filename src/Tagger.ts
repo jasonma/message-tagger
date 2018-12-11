@@ -6,13 +6,14 @@ import { IStrategy } from "./identification-strategy/api";
 import { FileSharingLinkStrategy } from "./identification-strategy/FileSharingLinkStrategy";
 import { IAttachment, IMessage } from "./message/api";
 import { MessageFromGmailMessage } from "./message/ConvertFromGmail";
+import { Stats } from "./stats/Stats";
 
 export class Tagger {
     private sensitiveTag = "tags/sensitive";
     private strategies: IStrategy[] = [new FileSharingLinkStrategy()];
     private actions: IAction[] = [new LabelAction(this.sensitiveTag)];
 
-    constructor(private gmail: Gmail) {}
+    constructor(private gmail: Gmail, private stats: Stats) {}
 
     public tagSensitiveMessages() {
         this.gmail.GetLabels().then((labels: IGmailLabel[]) => {
@@ -56,8 +57,9 @@ export class Tagger {
             });
 
             const isSensitive = this.strategies.some((strategy: IStrategy) => strategy.IsSensitive(message));
+            this.stats.MessageProcessed(message, isSensitive);
             if (isSensitive) {
-                console.log("message is sensitive: ", message.subject);
+                console.debug("message is sensitive: ", message.subject);
                 this.actions.forEach((action: IAction) => {
                     action.takeAction(this.gmail, message);
                 });

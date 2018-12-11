@@ -14,6 +14,14 @@ export class EmailAddress {
         this.name = "";
         this.address = s;
     }
+
+    public toString(): string {
+        if (this.name) {
+            return `${this.name} <${this.address}>`;
+        } else {
+            return this.address;
+        }
+    }
 }
 
 export interface IMessage {
